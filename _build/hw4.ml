@@ -1,8 +1,6 @@
-(* Name: Nick Castle *)
+(* Name: Chris Milne *)
 (* Course: UVM CS 225 Spring 2018 - Darais *)
 (* HW: HW4 *)
-
-(* Asked Aaron Longchamp some clarifying questions *)
 
 open Util
 open StringSetMap
@@ -109,52 +107,52 @@ let rec step (e0 : exp) (s : store) : result = match e0 with
       end
   | Pair(e1,e2) -> begin match step e1 s with
       | Val(v1) -> begin match step e2 s with
-          | Val(v2) -> Val(VPair(v1, v2))
-          | Step(e2',s') -> Step(Pair(e1, e2'),s')
+          | Val(v2) -> Val(VPair(v1,v2))
+          | Step(e2',s') -> Step(Pair(e1,e2'),s')
           | Stuck -> Stuck
           end
-      | Step(e1',s') -> Step(Pair(e1', e2), s')
+      | Step(e1',s') -> Step(Pair(e1',e2),s')
       | Stuck -> Stuck
       end
   | Projl(e1) -> begin match step e1 s with
-      | Val(VPair(v1,v2)) -> Step(exp_of_val(v1), s)
+      | Val(VPair(v1,v2)) -> Step(exp_of_val(v1),s)
       | Val(_) -> Stuck
       | Step(e1',s') -> Step(Projl(e1'), s')
       | Stuck -> Stuck
       end
   | Projr(e1) -> begin match step e1 s with
-      | Val(VPair(v1,v2)) -> Step(exp_of_val(v2), s)
+      | Val(VPair(v1,v2)) -> Step(exp_of_val(v2),s)
       | Val(_) -> Stuck
-      | Step(e1',s') -> Step(Projr(e1'), s')
+      | Step(e1',s') -> Step(Projr(e1'),s')
       | Stuck -> Stuck
       end
   | Ref(e1) -> begin match step e1 s with
       | Val(v1) ->
-        let new_store_val = store_fresh s in
-        let new_store = store_update new_store_val v1 s in
-        Step(Loc(new_store_val), new_store)
-      | Step(e1',s') -> Step(Ref(e1'), s')
+        let l = store_fresh s in
+        let l1 = store_update l v1 s in
+        Step(Loc(l), l1)
+      | Step(e1',s') -> Step(Ref(e1'),s')
       | Stuck -> Stuck
       end
   | Deref(e1) -> begin match step e1 s with
       | Val(VLoc(l)) -> Step(exp_of_val(store_lookup l s), s)
       | Val(_) -> Stuck
-      | Step(e1',s') -> Step(Deref(e1'), s')
+      | Step(e1',s') -> Step(Deref(e1'),s')
       | Stuck -> Stuck
       end
   | Assign(e1,e2) -> begin match step e1 s with
       | Val(VLoc(l1)) -> begin match step e2 s with
-          | Val(v2) -> Step(e2, store_update l1 v2 s)
-          | Step(e2',s') -> Step(Assign(e1, e2'), s')
+          | Val(v2) -> Step(e2,store_update l1 v2 s)
+          | Step(e2',s') -> Step(Assign(e1,e2'),s')
           | Stuck -> Stuck
           end
       | Val(_) -> Stuck
-      | Step(e1',s') -> Step(Assign(e1', e2), s')
+      | Step(e1',s') -> Step(Assign(e1',e2),s')
       | Stuck -> Stuck
       end
   | Sequence(e1,e2) -> begin match step e1 s with
       | Val(_) -> Step(e2, s)
-      | Step(e1',s') -> Step(Sequence(e1', e2), s')
+      | Step(e1',s') -> Step(Sequence(e1',e2),s')
       | Stuck -> Stuck
       end
   | Loc(l) -> Val(VLoc(l))
@@ -214,26 +212,24 @@ let rec infer (e : exp) (st : store_ty) : ty = match e with
       end
   | Ref(e1) -> Ref(infer e1 st)
   | Deref(e1) ->
-    let t1 = infer e1 st in
-    begin match t1 with
-    | Ref(t1) -> t1
-    | _ -> raise TYPE_ERROR
-    end
+      let t1 = infer e1 st in
+      begin match t1 with
+        |Ref(t1) -> t1
+        | _ -> raise TYPE_ERROR
+        end
   | Assign(e1,e2) ->
-    let t1 = infer e1 st in
-    let t2 = infer e2 st in
-    if t1 = Ref(t2) then
-    begin match t1 with
-      | Ref(t1) -> Bool
-      | _ -> raise TYPE_ERROR
-    end
-    else raise TYPE_ERROR
-  | Sequence(e1,e2) ->
-    let t1 = infer e1 st in
-    let t2 = infer e2 st in
-    t2
+      let t1 = infer e1 st in
+      let t2 = infer e2 st in
+      if t1 = Ref(t2) then
+      begin match t1 with
+        |Ref(t1) -> Bool
+        | _ -> raise TYPE_ERROR
+        end
+        else raise TYPE_ERROR
+  | Sequence(e1,e2) -> 
+      let t2 = infer e2 st in
+      t2
   | Loc(l) -> Ref(store_ty_lookup l st)
-
 let step_tests : test_block =
   let s1 : store = [(1,VTrue);(2,VFalse)] in
   let s2 : store = [(1,VTrue);(2,VTrue)] in
@@ -309,4 +305,4 @@ let _ =
   _SHOW_PASSED_TESTS := false ;
   run_tests [step_tests;infer_tests]
 
-(* Name: Nick Castle *)
+(* Name: Chris Milne *)
