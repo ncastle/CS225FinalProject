@@ -38,6 +38,9 @@ type exp =
   | Assign of exp * exp
   | Sequence of exp * exp
   | Loc of loc
+  | Error
+  | Try of exp * exp
+  | Raise of exp
 [@@deriving show {with_path = false}]
 
 (* Values.
