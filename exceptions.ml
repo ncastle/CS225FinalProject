@@ -1,23 +1,15 @@
-(* Name: Nick Castle *)
+(* Names: Nick Castle $ Chris Milne *)
 (* Course: UVM CS 225 Spring 2018 - Darais *)
-(* HW: HW4 *)
+(* Final Project: Exceptions *)
 
 (* Asked Aaron Longchamp some clarifying questions *)
 
 open Util
 open StringSetMap
 
-(* The Assignment:
- *
- * Fill in the `raise TODO` parts of the code:
- * - 30 cases in the `step` function
- * - 5 cases in the `infer` function
- *
- * See the writeup for the specification for `step` and `infer` functions that
- * you must implement.
- *
- * Passing all of the tests does not guarantee 100%. You may want to write some
- * tests of your own.
+(* The Goal:
+ * Implement exception handling, similarly to the way
+ * exceptions are handles in other languages like Java.
  *)
 
 exception NOT_FOUND
@@ -309,4 +301,4 @@ let _ =
   _SHOW_PASSED_TESTS := false ;
   run_tests [step_tests;infer_tests]
 
-(* Name: Nick Castle *)
+(* Names: Nick Castle & Chris Milne *)
