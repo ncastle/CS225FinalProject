@@ -47,6 +47,8 @@ type exp =
   | Sequence of exp * exp
   | Loc of loc
   | Error
+  | Try of exp * exp
+  | Raise of exp
 [@@deriving show {with_path = false}]
 
 (* Values.
@@ -160,7 +162,8 @@ let rec step (e0 : exp) (s : store) : result = match e0 with
       end
   | Loc(l) -> Val(VLoc(l))
   | Error -> raise TODO
-
+  | Try(e1,e2) -> raise TODO
+  | Raise(e1) -> raise TODO
 (* The reflexive transitive closure of the small-step semantics relation *)
 let rec step_star (e : exp) (s : store) : exp * store = match step e s with
   | Val(v) -> (exp_of_val v,s)
@@ -235,6 +238,8 @@ let rec infer (e : exp) (st : store_ty) : ty = match e with
       t2
   | Loc(l) -> Ref(store_ty_lookup l st)
   | Error -> raise TODO
+  | Try(e1,e2) -> raise TODO
+  | Raise(e1) -> raise TODO
 
 let step_tests : test_block =
   let s1 : store = [(1,VTrue);(2,VFalse)] in
