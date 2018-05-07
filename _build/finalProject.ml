@@ -1,23 +1,14 @@
-(* Name: Chris Milne *)
+(* Name: Chris Milne & Nick Castle*)
 (* Course: UVM CS 225 Spring 2018 - Darais *)
-(* HW: HW4 *)
-
-(* I received help from Nick Castle during this homework *)
 
 open Util
 open StringSetMap
 
-(* The Assignment:
- *
- * Fill in the `raise TODO` parts of the code:
- * - 30 cases in the `step` function
- * - 5 cases in the `infer` function
- *
- * See the writeup for the specification for `step` and `infer` functions that
- * you must implement.
- *
- * Passing all of the tests does not guarantee 100%. You may want to write some
- * tests of your own.
+(* The Project:
+ *  We will be implementing error handleing similar to error
+ *  handleing commonly seen in languages such as Java. We will be
+ *  adding this onto the simply typed lambda calculus which we have
+ *  been working with thus far in class.
  *)
 
 exception NOT_FOUND
@@ -316,4 +307,4 @@ let _ =
   _SHOW_PASSED_TESTS := false ;
   run_tests [step_tests;infer_tests]
 
-(* Name: Chris Milne *)
+(* Name: Chris Milne & Nick Castle*)
