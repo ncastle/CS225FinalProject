@@ -52,6 +52,7 @@ type value =
   | VFalse
   | VPair of value * value
   | VLoc of loc
+  | VError
 [@@deriving show {with_path = false}]
 
 let rec exp_of_val (v : value) : exp = match v with
@@ -59,6 +60,7 @@ let rec exp_of_val (v : value) : exp = match v with
   | VFalse -> False
   | VPair(v1,v2) -> Pair(exp_of_val v1,exp_of_val v2)
   | VLoc(l) -> Loc(l)
+  | VError -> Error
 
 type store = (loc * value) list
 [@@deriving show {with_path = false}]
@@ -152,7 +154,7 @@ let rec step (e0 : exp) (s : store) : result = match e0 with
       | Stuck -> Stuck
       end
   | Loc(l) -> Val(VLoc(l))
-  | Error -> raise TODO
+  | Error -> Val(VError)
   | Try(e1,e2) -> raise TODO
   | Raise(e1) -> raise TODO
 (* The reflexive transitive closure of the small-step semantics relation *)
@@ -171,6 +173,7 @@ type ty =
   | Bool
   | Prod of ty * ty
   | Ref of ty
+  | Error
 [@@deriving show {with_path = false}]
 
 type store_ty = (loc * ty) list
@@ -228,7 +231,7 @@ let rec infer (e : exp) (st : store_ty) : ty = match e with
       let t2 = infer e2 st in
       t2
   | Loc(l) -> Ref(store_ty_lookup l st)
-  | Error -> raise TODO
+  | Error -> Error
   | Try(e1,e2) -> raise TODO
   | Raise(e1) -> raise TODO
 
