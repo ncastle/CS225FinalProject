@@ -1,5 +1,13 @@
-This assignment is similar to hw3. You must complete the definitions for
-`subst_r` as well as `step`. See the instructions at the top of ec1.ml.
+This project by Chris Milne and Nick Castle extends our class homework 4 by adding
+in exception handling. For our checkpoint we have added the structure for Error,
+Try, and Raise into the end of the step and infer functions, which are all exception
+handling. We have also added Error, Try, and Raise as an exp type. Currently we have
+each expression type as raising "TODO" errors so that we know that they must still
+be implemented. We changed the name of hw4.ml to finalProject.ml and all of our work
+so far is in that file.
+
+
+Build Instructions: (David Durais)
 
 Make sure you have ocaml 4.06.0, and ppx_deriving installed.
 
@@ -22,9 +30,9 @@ directory as the default target:
 
     > make
 
-If you want to execute a file, for example, ec1.ml, just execute:
+If you want to execute a file, for example, finalProject.ml, just execute:
 
-    > make ec1
+    > make finalProject
 
 Running either of these commands will generate a bunch of compiled files. These
 will get placed in the _build directory, and that directory will be created
