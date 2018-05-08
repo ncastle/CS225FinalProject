@@ -52,6 +52,7 @@ type value =
   | VFalse
   | VPair of value * value
   | VLoc of loc
+  | VError
 [@@deriving show {with_path = false}]
 
 let rec exp_of_val (v : value) : exp = match v with
@@ -59,6 +60,7 @@ let rec exp_of_val (v : value) : exp = match v with
   | VFalse -> False
   | VPair(v1,v2) -> Pair(exp_of_val v1,exp_of_val v2)
   | VLoc(l) -> Loc(l)
+  | VError -> Error
 
 type store = (loc * value) list
 [@@deriving show {with_path = false}]
@@ -152,9 +154,17 @@ let rec step (e0 : exp) (s : store) : result = match e0 with
       | Stuck -> Stuck
       end
   | Loc(l) -> Val(VLoc(l))
-  | Error -> raise TODO
-  | Try(e1,e2) -> raise TODO
-  | Raise(e1) -> raise TODO
+  | Error -> Val(VError)
+  | Try(e1,e2) -> begin match step e1 s with
+      |Val(v1) -> Step(e1,s)
+      |Step(e1',s') -> Step(Try(e1',e2),s')
+      |Stuck -> Stuck
+      end
+  | Raise(e1) -> begin match step e1 s with
+      | Val(v1) -> Step(exp_of_val(v1),s)
+      | Step(e1',s') -> Step(Raise(e1'),s')
+      | Stuck -> Stuck
+      end
 (* The reflexive transitive closure of the small-step semantics relation *)
 let rec step_star (e : exp) (s : store) : exp * store = match step e s with
   | Val(v) -> (exp_of_val v,s)
@@ -171,6 +181,7 @@ type ty =
   | Bool
   | Prod of ty * ty
   | Ref of ty
+  | Error
 [@@deriving show {with_path = false}]
 
 type store_ty = (loc * ty) list
@@ -228,9 +239,9 @@ let rec infer (e : exp) (st : store_ty) : ty = match e with
       let t2 = infer e2 st in
       t2
   | Loc(l) -> Ref(store_ty_lookup l st)
-  | Error -> raise TODO
-  | Try(e1,e2) -> raise TODO
-  | Raise(e1) -> raise TODO
+  | Error -> Error
+  | Try(e1,e2) -> Error
+  | Raise(e1) -> Error
 
 let step_tests : test_block =
   let s1 : store = [(1,VTrue);(2,VFalse)] in
@@ -273,6 +284,12 @@ let step_tests : test_block =
     ; (Sequence(True,False),s1)                              , Step(False,s1)
     ; (Sequence(Assign(Loc(2),True),Deref(Loc(2))),s1)       , Step(Sequence(True,Deref(Loc(2))),s2)
     ; (Sequence(Deref(True),False),s1)                       , Stuck
+    ; (Error,s1)                                             , Val(VError)
+    ; (Try(If(False,Loc(1),Loc(2)),True),s1)                 , Step(Try(Loc(2),True),s1)
+    ; (Try(Deref(False),True),s1)                            , Stuck
+    ; (Raise(If(True,Pair(True,False),Pair(False,True))),s1) , Step(Raise(Pair(True,False)),s1)
+    ; (Raise(Deref(True)),s1)                                , Stuck
+
     ]
   , (fun (e,s) -> step e s)
   , [%show : exp * store]
@@ -297,6 +314,9 @@ let infer_tests =
     ; Assign(Loc(1),False)                                 , Bool
     ; Assign(Loc(2),Pair(True,False))                      , Bool
     ; Sequence(Assign(Loc(1),False),Ref(True))             , Ref(Bool)
+    ; Error                                                , Error
+    ; Try(True, Error)                                     , Error
+    ; Raise(Error)                                         , Error
     ]
   , (fun e -> infer e st)
   , (fun e -> [%show : exp * store_ty] (e,st))
