@@ -289,6 +289,7 @@ let step_tests : test_block =
     ; (Try(Deref(False),True),s1)                            , Stuck
     ; (Raise(If(True,Pair(True,False),Pair(False,True))),s1) , Step(Raise(Pair(True,False)),s1)
     ; (Raise(Deref(True)),s1)                                , Stuck
+    ; (Raise(Deref(False)),s1)                                , Stuck
 
     ]
   , (fun (e,s) -> step e s)
@@ -316,6 +317,7 @@ let infer_tests =
     ; Sequence(Assign(Loc(1),False),Ref(True))             , Ref(Bool)
     ; Error                                                , Error
     ; Try(True, Error)                                     , Error
+    ; Try(False, Error)                                    , Error
     ; Raise(Error)                                         , Error
     ]
   , (fun e -> infer e st)
